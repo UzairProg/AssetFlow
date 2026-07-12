@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { FiArrowRight, FiMenu, FiX } from 'react-icons/fi'
 
 import { navigationItems } from '../data'
+import { goToPath } from '../../../lib/demoAuth'
 import { BrandMark, cn, containerClass } from '../shared'
 
 const Navbar = () => {
@@ -50,12 +51,13 @@ const Navbar = () => {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <a
-            href="#login"
+          <button
+            type="button"
+            onClick={() => goToPath('/login')}
             className="rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-blue-900"
           >
             Login
-          </a>
+          </button>
           <motion.a
             href="#contact"
             whileHover={{ y: -1 }}
@@ -101,19 +103,21 @@ const Navbar = () => {
                 ))}
               </div>
               <div className="flex items-center gap-3">
-                <a
-                  href="#login"
+                <button
+                  type="button"
+                  onClick={() => goToPath('/login')}
                   className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700"
                 >
                   Login
-                </a>
-                <a
-                  href="#contact"
+                </button>
+                <button
+                  type="button"
+                  onClick={() => goToPath('/signup')}
                   className="inline-flex items-center gap-2 rounded-full bg-blue-900 px-5 py-3 text-sm font-semibold !text-white shadow-md"
                 >
                   Get Started
                   <FiArrowRight />
-                </a>
+                </button>
               </div>
             </div>
           </motion.div>

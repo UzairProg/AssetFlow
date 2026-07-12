@@ -8,6 +8,7 @@ import {
   FiTrendingUp,
 } from 'react-icons/fi'
 
+import { goToPath } from '../../../lib/demoAuth'
 import { fadeUpVariants, staggerVariants } from '../shared'
 
 const heroHighlights = ['Enterprise Ready', 'Secure', 'Fast Deployment']
@@ -43,13 +44,14 @@ const Hero = () => {
           </motion.p>
 
           <motion.div variants={fadeUpVariants} className="flex flex-col gap-4 sm:flex-row">
-            <a
-              href="#contact"
+            <button
+              type="button"
+              onClick={() => goToPath('/signup')}
               className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-900 px-7 py-4 text-sm font-semibold !text-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:bg-blue-800 hover:shadow-xl"
             >
               Get Started
               <FiArrowRight />
-            </a>
+            </button>
             <a
               href="#workflow"
               className="inline-flex items-center justify-center rounded-full border border-blue-200 bg-white px-7 py-4 text-sm font-semibold text-blue-900 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-300 hover:shadow-md"
