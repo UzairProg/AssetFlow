@@ -25,18 +25,23 @@ enum AssetStatus {
 }
 
 model User {
-  id             String      @id @default(uuid())
-  name           String
-  email          String      @unique
-  password       String
-  role           Role        @default(EMPLOYEE)
-  status         String      @default("ACTIVE")
-  departmentId   String?
-  department     Department? @relation("UserDepartment", fields: [departmentId], references: [id])
-  headedDept     Department? @relation("DepartmentHead")
-  assignedAssets Asset[]     @relation("AssetAssignee")
-  allocations    Allocation[]
-  createdAt      DateTime    @default(now())
+  id                              String            @id @default(uuid())
+  name                            String
+  email                           String            @unique
+  password                        String
+  role                            Role              @default(EMPLOYEE)
+  status                          String            @default("ACTIVE")
+  departmentId                    String?
+  department                      Department?       @relation("UserDepartment", fields: [departmentId], references: [id])
+  headedDept                      Department?       @relation("DepartmentHead")
+  assignedAssets                  Asset[]           @relation("AssetAssignee")
+  allocations                     Allocation[]
+  transferRequestsCurrentHolder   TransferRequest[] @relation("TransferCurrentHolder")
+  transferRequestsRequestedHolder TransferRequest[] @relation("TransferRequestedHolder")
+  transferRequestsRequestedBy     TransferRequest[] @relation("TransferRequestedBy")
+  transferRequestsApprovedBy      TransferRequest[] @relation("TransferApprovedBy")
+  bookings                        Booking[]         @relation("BookingUser")
+  createdAt                       DateTime          @default(now())
 }
 
 model Department {
@@ -51,6 +56,7 @@ model Department {
   users              User[]       @relation("UserDepartment")
   assets             Asset[]      @relation("AssetDepartment")
   allocations        Allocation[]
+  bookings           Booking[]
   createdAt          DateTime     @default(now())
 }
 
@@ -63,23 +69,26 @@ model AssetCategory {
 }
 
 model Asset {
-  id              String      @id @default(uuid())
-  assetTag        String      @unique
-  name            String
-  categoryId      String
-  category        AssetCategory @relation(fields: [categoryId], references: [id])
-  serialNumber    String?     @unique
-  acquisitionDate DateTime
-  acquisitionCost Decimal     @db.Decimal(12, 2)
-  condition       String
-  location        String
-  status          AssetStatus @default(AVAILABLE)
-  departmentId    String?
-  department      Department? @relation("AssetDepartment", fields: [departmentId], references: [id])
-  assignedToId    String?
-  assignedTo      User?       @relation("AssetAssignee", fields: [assignedToId], references: [id])
-  allocations     Allocation[]
-  createdAt       DateTime    @default(now())
+  id               String            @id @default(uuid())
+  assetTag         String            @unique
+  name             String
+  categoryId       String
+  category         AssetCategory     @relation(fields: [categoryId], references: [id])
+  serialNumber     String?           @unique
+  acquisitionDate  DateTime
+  acquisitionCost  Decimal           @db.Decimal(12, 2)
+  condition        String
+  location         String
+  status           AssetStatus       @default(AVAILABLE)
+  departmentId     String?
+  department       Department?       @relation("AssetDepartment", fields: [departmentId], references: [id])
+  assignedToId     String?
+  assignedTo       User?             @relation("AssetAssignee", fields: [assignedToId], references: [id])
+  allocations      Allocation[]
+  transferRequests TransferRequest[]
+  bookings         Booking[]
+  sharedBookable   Boolean           @default(false)
+  createdAt        DateTime          @default(now())
 }
 
 model Allocation {
@@ -93,4 +102,52 @@ model Allocation {
   allocatedAt  DateTime    @default(now())
   returnedAt   DateTime?
   status       String      @default("ACTIVE") // ACTIVE, RETURNED
+}
+
+enum TransferStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model TransferRequest {
+  id                String         @id @default(uuid())
+  assetId           String
+  asset             Asset          @relation(fields: [assetId], references: [id])
+  currentHolderId   String
+  currentHolder     User           @relation("TransferCurrentHolder", fields: [currentHolderId], references: [id])
+  requestedHolderId String
+  requestedHolder   User           @relation("TransferRequestedHolder", fields: [requestedHolderId], references: [id])
+  requestedById     String
+  requestedBy       User           @relation("TransferRequestedBy", fields: [requestedById], references: [id])
+  approvedById      String?
+  approvedBy        User?          @relation("TransferApprovedBy", fields: [approvedById], references: [id])
+  remarks           String?
+  status            TransferStatus @default(PENDING)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+enum BookingStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+model Booking {
+  id           String        @id @default(uuid())
+  assetId      String
+  asset        Asset         @relation(fields: [assetId], references: [id])
+  bookedById   String
+  bookedBy     User          @relation("BookingUser", fields: [bookedById], references: [id])
+  departmentId String?
+  department   Department?   @relation(fields: [departmentId], references: [id])
+  title        String
+  purpose      String?
+  startTime    DateTime
+  endTime      DateTime
+  status       BookingStatus @default(UPCOMING)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }

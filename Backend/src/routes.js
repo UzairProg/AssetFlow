@@ -5,6 +5,8 @@ const jwt = require('jsonwebtoken');
 const prisma = require('./db');
 const { authenticate, authorize, validate } = require('./middleware');
 const allocationRoutes = require('./routes/allocation.routes');
+const transferRoutes = require('./routes/transfer.routes');
+const bookingRoutes = require('./routes/booking.routes');
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-for-assetflow-hackathon';
@@ -44,7 +46,8 @@ const AssetSchema = z.object({
   location: z.string().min(1, 'Location is required'),
   status: z.enum(['AVAILABLE', 'ALLOCATED', 'RESERVED', 'UNDER_MAINTENANCE', 'LOST', 'RETIRED', 'DISPOSED']).optional(),
   departmentId: z.string().uuid().nullable().optional(),
-  assignedToId: z.string().uuid().nullable().optional()
+  assignedToId: z.string().uuid().nullable().optional(),
+  sharedBookable: z.boolean().optional()
 });
 
 const AssetStatusSchema = z.object({
@@ -307,6 +310,12 @@ router.route('/assets/:id')
 
 // --- ALLOCATION ROUTE HANDLERS ---
 router.use('/allocations', allocationRoutes);
+
+// --- TRANSFER ROUTE HANDLERS ---
+router.use('/transfers', transferRoutes);
+
+// --- BOOKING ROUTE HANDLERS ---
+router.use('/bookings', bookingRoutes);
 
 // --- DASHBOARD ROUTE HANDLERS ---
 
