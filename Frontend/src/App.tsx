@@ -11,7 +11,18 @@ import AuthIllustration from './components/auth/AuthIllustration'
 import LandingPage from './pages/Landing/LandingPage'
 import DashboardPage from './pages/dashboard/DashboardPage'
 import OrganizationOverview from './pages/organization/overview/OverviewPage'
+import AssetOverview from './pages/assets/overview/AssetOverview'
+import AllocationOverview from './pages/allocation/overview/AllocationOverview'
+import AllocatePage from './pages/allocation/allocate/AllocatePage'
+import TransfersList from './pages/allocation/transfers/list/TransfersList'
+import AssetDirectory from './pages/assets/directory/AssetDirectory'
 import PlaceholderPage from './pages/Placeholder/PlaceholderPage'
+import BookingDashboard from './pages/booking/dashboard/BookingDashboard'
+import ResourceDirectory from './pages/booking/directory/ResourceDirectory'
+import BookingCalendar from './pages/booking/calendar/BookingCalendar'
+import CreateBooking from './pages/booking/create/CreateBooking'
+import BookingDetails from './pages/booking/details/BookingDetails'
+import BookingHistory from './pages/booking/history/BookingHistory'
 import ForgotPassword from './pages/auth/ForgotPassword/ForgotPassword'
 import Login from './pages/auth/Login/Login'
 import ResetPassword from './pages/auth/ResetPassword/ResetPassword'
@@ -45,7 +56,23 @@ const App = () => {
   if (pathname === '/two-factor') return <TwoFactor />
   if (pathname === '/dashboard') return <DashboardPage />
   if (pathname === '/organization' || pathname.startsWith('/organization/')) return <OrganizationOverview />
-  if (pathname.startsWith('/assets')) return <PlaceholderPage title="Assets" subtitle="Asset management pages are coming soon." />
+  if (pathname === '/assets' || pathname === '/assets/overview') return <AssetOverview />
+  if (pathname === '/assets/directory' || pathname.startsWith('/assets/directory')) return <AssetDirectory />
+  if (pathname === '/allocation' || pathname.startsWith('/allocation/')) {
+    if (pathname === '/allocation') return <AllocationOverview />
+    if (pathname === '/allocation/allocate') return <AllocatePage />
+    if (pathname.startsWith('/allocation/transfers')) return <TransfersList />
+    return <AllocationOverview />
+  }
+  if (pathname === '/booking' || pathname.startsWith('/booking/')) {
+    if (pathname === '/booking') return <BookingDashboard />
+    if (pathname === '/booking/directory') return <ResourceDirectory />
+    if (pathname === '/booking/calendar') return <BookingCalendar />
+    if (pathname === '/booking/create') return <CreateBooking />
+    if (pathname.startsWith('/booking/details')) return <BookingDetails />
+    if (pathname.startsWith('/booking/history')) return <BookingHistory />
+    return <BookingDashboard />
+  }
   if (pathname.startsWith('/bookings')) return <PlaceholderPage title="Bookings" subtitle="Bookings pages are coming soon." />
   if (pathname.startsWith('/maintenance')) return <PlaceholderPage title="Maintenance" subtitle="Maintenance pages are coming soon." />
   if (pathname.startsWith('/audit')) return <PlaceholderPage title="Audit" subtitle="Audit pages are coming soon." />

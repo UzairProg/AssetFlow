@@ -1,9 +1,9 @@
 import type { FC } from 'react'
 import { motion } from 'framer-motion'
-import DashboardLayout from '../../../../layouts/DashboardLayout/DashboardLayout'
-import StatisticsCard from '../../../../components/assets/AssetStatistics/StatisticsCard'
-import AssetTable from '../../../../components/assets/AssetTable/AssetTable'
-import AssetTimeline from '../../../../components/assets/AssetTimeline/AssetTimeline'
+import DashboardLayout from '../../../layouts/DashboardLayout/DashboardLayout'
+import StatisticsCard from '../../../components/assets/AssetStatistics/StatisticsCard'
+import AssetTable from '../../../components/assets/AssetTable/AssetTable'
+import AssetTimeline from '../../../components/assets/AssetTimeline/AssetTimeline'
 
 const stats = [
   { label: 'Total Assets', value: 1248 },
