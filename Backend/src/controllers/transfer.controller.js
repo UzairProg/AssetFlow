@@ -66,7 +66,7 @@ class TransferController {
     try {
       const { id } = req.params;
       const { remarks } = req.body;
-      const result = await transferService.rejectRequest(id, remarks);
+      const result = await transferService.rejectRequest(id, req.user.id, remarks);
       res.json(result);
     } catch (error) {
       next(error);

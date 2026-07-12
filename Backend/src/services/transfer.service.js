@@ -1,4 +1,6 @@
 const prisma = require('../db');
+const activityLogService = require('./activity-log.service');
+const notificationService = require('./notification.service');
 
 class TransferService {
   async createTransferRequest({ assetId, requestedHolderId, requestedById, remarks }) {
@@ -56,6 +58,13 @@ class TransferService {
         remarks,
         status: 'PENDING'
       }
+    });
+
+    await activityLogService.log({
+      userId: requestedById,
+      module: 'TRANSFER',
+      action: 'CREATE_REQUEST',
+      entityId: transferRequest.id
     });
 
     return transferRequest;
@@ -173,10 +182,24 @@ class TransferService {
       return updatedReq;
     });
 
+    await activityLogService.log({
+      userId: approvedById,
+      module: 'TRANSFER',
+      action: 'APPROVE_REQUEST',
+      entityId: result.id
+    });
+
+    await notificationService.createNotification({
+      userId: request.requestedHolderId,
+      title: 'Transfer Approved',
+      message: `Your transfer request for an asset was approved.`,
+      type: 'TRANSFER_APPROVED'
+    });
+
     return result;
   }
 
-  async rejectRequest(id, remarks) {
+  async rejectRequest(id, rejectedById, remarks) {
     const request = await prisma.transferRequest.findUnique({
       where: { id }
     });
@@ -194,6 +217,13 @@ class TransferService {
         status: 'REJECTED',
         remarks: remarks ? `${request.remarks || ''}\nRejection remarks: ${remarks}` : request.remarks
       }
+    });
+
+    await activityLogService.log({
+      userId: rejectedById,
+      module: 'TRANSFER',
+      action: 'REJECT_REQUEST',
+      entityId: updated.id
     });
 
     return updated;
