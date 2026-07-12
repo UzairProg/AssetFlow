@@ -59,6 +59,15 @@ class AllocationController {
       next(error);
     }
   }
+
+  async notifyOverdue(req, res, next) {
+    try {
+      const count = await allocationService.notifyOverdueReturns();
+      res.json({ message: `Notified ${count} overdue returns.` });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new AllocationController();

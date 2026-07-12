@@ -1,4 +1,6 @@
 const prisma = require('../db');
+const activityLogService = require('./activity-log.service');
+const notificationService = require('./notification.service');
 
 class BookingService {
   async computeBookingStatus(booking) {
@@ -75,7 +77,7 @@ class BookingService {
       computedStatus = 'ONGOING';
     }
 
-    return await prisma.booking.create({
+    const booking = await prisma.booking.create({
       data: {
         assetId,
         bookedById,
@@ -88,6 +90,22 @@ class BookingService {
       },
       include: { asset: true }
     });
+
+    await activityLogService.log({
+      userId: bookedById,
+      module: 'BOOKING',
+      action: 'CREATE_BOOKING',
+      entityId: booking.id
+    });
+
+    await notificationService.createNotification({
+      userId: bookedById,
+      title: 'Booking Confirmed',
+      message: `Your booking for ${booking.asset.name} is confirmed.`,
+      type: 'BOOKING_CREATED'
+    });
+
+    return booking;
   }
 
   async updateBooking(id, bookedById, data) {
@@ -151,11 +169,29 @@ class BookingService {
       throw { status: 400, message: 'Booking is already cancelled' };
     }
 
-    return await prisma.booking.update({
+    const cancelled = await prisma.booking.update({
       where: { id },
       data: { status: 'CANCELLED' },
       include: { asset: true }
     });
+
+    await activityLogService.log({
+      userId,
+      module: 'BOOKING',
+      action: 'CANCEL_BOOKING',
+      entityId: id
+    });
+
+    if (cancelled.bookedById !== userId) {
+      await notificationService.createNotification({
+        userId: cancelled.bookedById,
+        title: 'Booking Cancelled',
+        message: `Your booking for ${cancelled.asset.name} was cancelled by an admin/manager.`,
+        type: 'BOOKING_CANCELLED'
+      });
+    }
+
+    return cancelled;
   }
 
   async getBooking(id) {

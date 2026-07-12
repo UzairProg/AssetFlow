@@ -1,8 +1,10 @@
 const prisma = require('../db');
+const activityLogService = require('./activity-log.service');
+const notificationService = require('./notification.service');
 
 class AllocationService {
   async allocateAsset({ assetId, userId, departmentId }) {
-    return prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
       // Check asset status
       const asset = await tx.asset.findUnique({ where: { id: assetId } });
       if (!asset) {
@@ -50,6 +52,22 @@ class AllocationService {
 
       return allocation;
     });
+
+    await activityLogService.log({
+      userId,
+      module: 'ALLOCATION',
+      action: 'ALLOCATE_ASSET',
+      entityId: result.id
+    });
+
+    await notificationService.createNotification({
+      userId,
+      title: 'Asset Allocated',
+      message: `An asset has been allocated to you.`,
+      type: 'ALLOCATION_CREATED'
+    });
+
+    return result;
   }
 
   async getAllocationById(id) {
@@ -80,7 +98,7 @@ class AllocationService {
   }
 
   async returnAsset(assetId) {
-    return prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
       // Find active allocation for this asset
       const allocation = await tx.allocation.findFirst({
         where: { assetId, status: 'ACTIVE' }
@@ -109,6 +127,41 @@ class AllocationService {
 
       return updatedAllocation;
     });
+
+    await activityLogService.log({
+      userId: result.userId,
+      module: 'ALLOCATION',
+      action: 'RETURN_ASSET',
+      entityId: result.id
+    });
+
+    return result;
+  }
+
+  async notifyOverdueReturns() {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const overdueAllocations = await prisma.allocation.findMany({
+      where: {
+        status: 'ACTIVE',
+        allocatedAt: { lt: thirtyDaysAgo }
+      },
+      include: { asset: true }
+    });
+
+    let count = 0;
+    for (const alloc of overdueAllocations) {
+      await notificationService.createNotification({
+        userId: alloc.userId,
+        title: 'Overdue Asset Return',
+        message: `Your allocation for asset ${alloc.asset.assetTag} is overdue. Please return it or renew the allocation.`,
+        type: 'OVERDUE_RETURN'
+      });
+      count++;
+    }
+
+    return count;
   }
 }
 

@@ -63,4 +63,11 @@ router.get(
   allocationController.getAllocationById
 );
 
+// Notify overdue returns (dummy endpoint for cron or manual trigger)
+router.post(
+  '/notify-overdue',
+  authorize('ADMIN', 'ASSET_MANAGER'),
+  allocationController.notifyOverdue
+);
+
 module.exports = router;

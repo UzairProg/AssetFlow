@@ -4,9 +4,15 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require('./db');
 const { authenticate, authorize, validate } = require('./middleware');
+const bookingRoutes = require('./routes/booking.routes');
 const allocationRoutes = require('./routes/allocation.routes');
 const transferRoutes = require('./routes/transfer.routes');
-const bookingRoutes = require('./routes/booking.routes');
+const maintenanceRoutes = require('./routes/maintenance.routes');
+const auditRoutes = require('./routes/audit.routes');
+const notificationRoutes = require('./routes/notification.routes');
+const activityLogRoutes = require('./routes/activity-log.routes');
+const reportRoutes = require('./routes/report.routes');
+const activityLogService = require('./services/activity-log.service');
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-for-assetflow-hackathon';
@@ -272,6 +278,12 @@ router.route('/assets')
   }))
   .post(authorize('ADMIN', 'ASSET_MANAGER'), validate(AssetSchema), asyncHandler(async (req, res) => {
     const asset = await prisma.asset.create({ data: req.body });
+    await activityLogService.log({
+      userId: req.user.id,
+      module: 'ASSETS',
+      action: 'CREATE_ASSET',
+      entityId: asset.id
+    });
     res.status(201).json(asset);
   }));
 
@@ -295,6 +307,12 @@ router.route('/assets/:id')
       where: { id },
       data: req.body
     });
+    await activityLogService.log({
+      userId: req.user.id,
+      module: 'ASSETS',
+      action: 'UPDATE_ASSET',
+      entityId: asset.id
+    });
     res.json(asset);
   }))
   .patch(authorize('ADMIN', 'ASSET_MANAGER', 'DEPARTMENT_HEAD'), validate(AssetStatusSchema), asyncHandler(async (req, res) => {
@@ -304,6 +322,13 @@ router.route('/assets/:id')
     const asset = await prisma.asset.update({
       where: { id },
       data: { status }
+    });
+    await activityLogService.log({
+      userId: req.user.id,
+      module: 'ASSETS',
+      action: 'PATCH_ASSET_STATUS',
+      entityId: asset.id,
+      metadata: { status }
     });
     res.json(asset);
   }));
@@ -316,6 +341,21 @@ router.use('/transfers', transferRoutes);
 
 // --- BOOKING ROUTE HANDLERS ---
 router.use('/bookings', bookingRoutes);
+
+// --- MAINTENANCE ROUTE HANDLERS ---
+router.use('/maintenance', maintenanceRoutes);
+
+// --- AUDIT ROUTE HANDLERS ---
+router.use('/audits', auditRoutes);
+
+// --- NOTIFICATION ROUTE HANDLERS ---
+router.use('/notifications', notificationRoutes);
+
+// --- ACTIVITY LOG ROUTE HANDLERS ---
+router.use('/activity-logs', activityLogRoutes);
+
+// --- REPORT ROUTE HANDLERS ---
+router.use('/reports', reportRoutes);
 
 // --- DASHBOARD ROUTE HANDLERS ---
 

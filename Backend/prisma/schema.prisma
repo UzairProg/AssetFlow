@@ -25,23 +25,29 @@ enum AssetStatus {
 }
 
 model User {
-  id                              String            @id @default(uuid())
+  id                              String               @id @default(uuid())
   name                            String
-  email                           String            @unique
+  email                           String               @unique
   password                        String
-  role                            Role              @default(EMPLOYEE)
-  status                          String            @default("ACTIVE")
+  role                            Role                 @default(EMPLOYEE)
+  status                          String               @default("ACTIVE")
   departmentId                    String?
-  department                      Department?       @relation("UserDepartment", fields: [departmentId], references: [id])
-  headedDept                      Department?       @relation("DepartmentHead")
-  assignedAssets                  Asset[]           @relation("AssetAssignee")
+  department                      Department?          @relation("UserDepartment", fields: [departmentId], references: [id])
+  headedDept                      Department?          @relation("DepartmentHead")
+  assignedAssets                  Asset[]              @relation("AssetAssignee")
   allocations                     Allocation[]
-  transferRequestsCurrentHolder   TransferRequest[] @relation("TransferCurrentHolder")
-  transferRequestsRequestedHolder TransferRequest[] @relation("TransferRequestedHolder")
-  transferRequestsRequestedBy     TransferRequest[] @relation("TransferRequestedBy")
-  transferRequestsApprovedBy      TransferRequest[] @relation("TransferApprovedBy")
-  bookings                        Booking[]         @relation("BookingUser")
-  createdAt                       DateTime          @default(now())
+  transferRequestsCurrentHolder   TransferRequest[]    @relation("TransferCurrentHolder")
+  transferRequestsRequestedHolder TransferRequest[]    @relation("TransferRequestedHolder")
+  transferRequestsRequestedBy     TransferRequest[]    @relation("TransferRequestedBy")
+  transferRequestsApprovedBy      TransferRequest[]    @relation("TransferApprovedBy")
+  bookings                        Booking[]            @relation("BookingUser")
+  maintenanceReported             MaintenanceRequest[] @relation("MaintenanceReportedBy")
+  maintenanceApproved             MaintenanceRequest[] @relation("MaintenanceApprovedBy")
+  maintenanceAssigned             MaintenanceRequest[] @relation("MaintenanceAssignedTo")
+  auditResults                    AuditResult[]
+  notifications                   Notification[]
+  activityLogs                    ActivityLog[]
+  createdAt                       DateTime             @default(now())
 }
 
 model Department {
@@ -69,26 +75,28 @@ model AssetCategory {
 }
 
 model Asset {
-  id               String            @id @default(uuid())
-  assetTag         String            @unique
-  name             String
-  categoryId       String
-  category         AssetCategory     @relation(fields: [categoryId], references: [id])
-  serialNumber     String?           @unique
-  acquisitionDate  DateTime
-  acquisitionCost  Decimal           @db.Decimal(12, 2)
-  condition        String
-  location         String
-  status           AssetStatus       @default(AVAILABLE)
-  departmentId     String?
-  department       Department?       @relation("AssetDepartment", fields: [departmentId], references: [id])
-  assignedToId     String?
-  assignedTo       User?             @relation("AssetAssignee", fields: [assignedToId], references: [id])
-  allocations      Allocation[]
-  transferRequests TransferRequest[]
-  bookings         Booking[]
-  sharedBookable   Boolean           @default(false)
-  createdAt        DateTime          @default(now())
+  id                  String               @id @default(uuid())
+  assetTag            String               @unique
+  name                String
+  categoryId          String
+  category            AssetCategory        @relation(fields: [categoryId], references: [id])
+  serialNumber        String?              @unique
+  acquisitionDate     DateTime
+  acquisitionCost     Decimal              @db.Decimal(12, 2)
+  condition           String
+  location            String
+  status              AssetStatus          @default(AVAILABLE)
+  departmentId        String?
+  department          Department?          @relation("AssetDepartment", fields: [departmentId], references: [id])
+  assignedToId        String?
+  assignedTo          User?                @relation("AssetAssignee", fields: [assignedToId], references: [id])
+  allocations         Allocation[]
+  transferRequests    TransferRequest[]
+  bookings            Booking[]
+  sharedBookable      Boolean              @default(false)
+  maintenanceRequests MaintenanceRequest[]
+  auditResults        AuditResult[]
+  createdAt           DateTime             @default(now())
 }
 
 model Allocation {
@@ -150,4 +158,108 @@ model Booking {
   status       BookingStatus @default(UPCOMING)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+}
+
+// --- Maintenance Management ---
+enum MaintenancePriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum MaintenanceStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+}
+
+model MaintenanceRequest {
+  id                   String              @id @default(uuid())
+  assetId              String
+  asset                Asset               @relation(fields: [assetId], references: [id])
+  reportedById         String
+  reportedBy           User                @relation("MaintenanceReportedBy", fields: [reportedById], references: [id])
+  approvedById         String?
+  approvedBy           User?               @relation("MaintenanceApprovedBy", fields: [approvedById], references: [id])
+  assignedTechnicianId String?
+  assignedTechnician   User?               @relation("MaintenanceAssignedTo", fields: [assignedTechnicianId], references: [id])
+  issueDescription     String
+  priority             MaintenancePriority
+  status               MaintenanceStatus   @default(PENDING)
+  attachments          String? // Optional
+  remarks              String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+}
+
+// --- Audit Management ---
+enum AuditStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model AuditCycle {
+  id          String        @id @default(uuid())
+  title       String
+  description String?
+  scope       String?
+  departments String[] // Array of department IDs
+  locations   String[] // Array of locations
+  auditors    String[] // Array of user IDs
+  startDate   DateTime
+  endDate     DateTime
+  status      AuditStatus   @default(PLANNED)
+  results     AuditResult[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+enum AuditVerificationStatus {
+  VERIFIED
+  MISSING
+  DAMAGED
+}
+
+model AuditResult {
+  id                 String                  @id @default(uuid())
+  auditCycleId       String
+  auditCycle         AuditCycle              @relation(fields: [auditCycleId], references: [id])
+  assetId            String
+  asset              Asset                   @relation(fields: [assetId], references: [id])
+  auditorId          String
+  auditor            User                    @relation(fields: [auditorId], references: [id])
+  verificationStatus AuditVerificationStatus
+  remarks            String?
+  createdAt          DateTime                @default(now())
+}
+
+// --- Notifications ---
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  type      String
+  isRead    Boolean  @default(false)
+  metadata  String? // JSON stringified
+  createdAt DateTime @default(now())
+}
+
+// --- Activity Logs ---
+model ActivityLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  module    String
+  action    String
+  entityId  String?
+  metadata  String? // JSON stringified
+  createdAt DateTime @default(now())
 }
