@@ -15,6 +15,18 @@ const CreateCycleSchema = z.object({
   startDate: z.string(),
   endDate: z.string()
 });
+
+const UpdateCycleSchema = z.object({
+  title: z.string().min(1).optional(),
+  description: z.string().optional(),
+  scope: z.string().optional(),
+  departments: z.array(z.string().uuid()).optional(),
+  locations: z.array(z.string()).optional(),
+  auditors: z.array(z.string().uuid()).optional(),
+  startDate: z.string().transform(v => new Date(v)).optional(),
+  endDate: z.string().transform(v => new Date(v)).optional()
+});
+
 const AssignAuditorsSchema = z.object({ auditors: z.array(z.string().uuid()) });
 const VerifySchema = z.object({
   auditCycleId: z.string().uuid(),
@@ -24,7 +36,7 @@ const VerifySchema = z.object({
 });
 
 router.post('/', authorize('ASSET_MANAGER', 'ADMIN'), validate(CreateCycleSchema), auditController.createCycle);
-router.put('/:id', authorize('ASSET_MANAGER', 'ADMIN'), auditController.updateCycle);
+router.put('/:id', authorize('ASSET_MANAGER', 'ADMIN'), validate(UpdateCycleSchema), auditController.updateCycle);
 router.post('/:id/assign', authorize('ASSET_MANAGER', 'ADMIN'), validate(AssignAuditorsSchema), auditController.assignAuditors);
 router.get('/', auditController.getCycles);
 router.get('/:id', auditController.getDetails);
