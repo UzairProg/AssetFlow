@@ -30,6 +30,7 @@ import Signup from './pages/auth/Signup/Signup'
 import TwoFactor from './pages/auth/TwoFactor/TwoFactor'
 import VerifyEmail from './pages/auth/VerifyEmail/VerifyEmail'
 import { goToPath } from './lib/demoAuth'
+import AppShell from './components/global/AppShell/AppShell'
 
 const usePathname = () => {
   const [pathname, setPathname] = useState(window.location.pathname)
@@ -47,6 +48,7 @@ const usePathname = () => {
 const App = () => {
   const pathname = usePathname()
 
+  // Auth and landing pages - render without app shell
   if (pathname === '/' || pathname === '/landing') return <LandingPage />
   if (pathname === '/login') return <Login />
   if (pathname === '/signup') return <Signup />
@@ -54,67 +56,71 @@ const App = () => {
   if (pathname === '/verify-email') return <VerifyEmail />
   if (pathname === '/reset-password') return <ResetPassword />
   if (pathname === '/two-factor') return <TwoFactor />
-  if (pathname === '/dashboard') return <DashboardPage />
-  if (pathname === '/organization' || pathname.startsWith('/organization/')) return <OrganizationOverview />
-  if (pathname === '/assets' || pathname === '/assets/overview') return <AssetOverview />
-  if (pathname === '/assets/directory' || pathname.startsWith('/assets/directory')) return <AssetDirectory />
-  if (pathname === '/allocation' || pathname.startsWith('/allocation/')) {
-    if (pathname === '/allocation') return <AllocationOverview />
-    if (pathname === '/allocation/allocate') return <AllocatePage />
-    if (pathname.startsWith('/allocation/transfers')) return <TransfersList />
-    return <AllocationOverview />
-  }
-  if (pathname === '/booking' || pathname.startsWith('/booking/')) {
-    if (pathname === '/booking') return <BookingDashboard />
-    if (pathname === '/booking/directory') return <ResourceDirectory />
-    if (pathname === '/booking/calendar') return <BookingCalendar />
-    if (pathname === '/booking/create') return <CreateBooking />
-    if (pathname.startsWith('/booking/details')) return <BookingDetails />
-    if (pathname.startsWith('/booking/history')) return <BookingHistory />
-    return <BookingDashboard />
-  }
-  if (pathname.startsWith('/bookings')) return <PlaceholderPage title="Bookings" subtitle="Bookings pages are coming soon." />
-  if (pathname.startsWith('/maintenance')) return <PlaceholderPage title="Maintenance" subtitle="Maintenance pages are coming soon." />
-  if (pathname.startsWith('/audit')) return <PlaceholderPage title="Audit" subtitle="Audit pages are coming soon." />
-  if (pathname.startsWith('/reports')) return <PlaceholderPage title="Reports" subtitle="Reports pages are coming soon." />
-  if (pathname.startsWith('/notifications')) return <PlaceholderPage title="Notifications" subtitle="Notifications pages are coming soon." />
-  if (pathname.startsWith('/activity')) return <PlaceholderPage title="Activity Logs" subtitle="Activity log pages are coming soon." />
-  if (pathname.startsWith('/settings')) return <PlaceholderPage title="Settings" subtitle="Settings pages are coming soon." />
 
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45 }}
-        className="w-full max-w-md space-y-6"
-      >
-        <AuthHeader
-          title="Page not found"
-          subtitle="The requested experience is not available. Use the links below to continue."
-        />
-        <AuthIllustration />
-        <AuthCard>
-          <div className="space-y-4 text-center">
-            <p className="text-sm text-slate-500">
-              Return to the enterprise authentication flow or open the demo dashboard.
-            </p>
-            <div className="space-y-3">
-              <AuthButton type="button" fullWidth onClick={() => goToPath('/login')}>
-                <LogIn className="h-4 w-4" />
-                Go to Login
-              </AuthButton>
-              <AuthButton type="button" variant="secondary" fullWidth onClick={() => goToPath('/dashboard')}>
-                <LayoutDashboard className="h-4 w-4" />
-                Open Demo Dashboard
-              </AuthButton>
+  // Determine page for non-auth routes
+  let page: JSX.Element | null = null
+
+  if (pathname === '/dashboard') page = <DashboardPage />
+  else if (pathname === '/organization' || pathname.startsWith('/organization/')) page = <OrganizationOverview />
+  else if (pathname === '/assets' || pathname === '/assets/overview') page = <AssetOverview />
+  else if (pathname === '/assets/directory' || pathname.startsWith('/assets/directory')) page = <AssetDirectory />
+  else if (pathname === '/allocation' || pathname.startsWith('/allocation/')) {
+    if (pathname === '/allocation') page = <AllocationOverview />
+    else if (pathname === '/allocation/allocate') page = <AllocatePage />
+    else if (pathname.startsWith('/allocation/transfers')) page = <TransfersList />
+    else page = <AllocationOverview />
+  } else if (pathname === '/booking' || pathname.startsWith('/booking/')) {
+    if (pathname === '/booking') page = <BookingDashboard />
+    else if (pathname === '/booking/directory') page = <ResourceDirectory />
+    else if (pathname === '/booking/calendar') page = <BookingCalendar />
+    else if (pathname === '/booking/create') page = <CreateBooking />
+    else if (pathname.startsWith('/booking/details')) page = <BookingDetails />
+    else if (pathname.startsWith('/booking/history')) page = <BookingHistory />
+    else page = <BookingDashboard />
+  } else if (pathname.startsWith('/bookings')) page = <PlaceholderPage title="Bookings" subtitle="Bookings pages are coming soon." />
+  else if (pathname.startsWith('/maintenance')) page = <PlaceholderPage title="Maintenance" subtitle="Maintenance pages are coming soon." />
+  else if (pathname.startsWith('/audit')) page = <PlaceholderPage title="Audit" subtitle="Audit pages are coming soon." />
+  else if (pathname.startsWith('/reports')) page = <PlaceholderPage title="Reports" subtitle="Reports pages are coming soon." />
+  else if (pathname.startsWith('/notifications')) page = <PlaceholderPage title="Notifications" subtitle="Notifications pages are coming soon." />
+  else if (pathname.startsWith('/activity')) page = <PlaceholderPage title="Activity Logs" subtitle="Activity log pages are coming soon." />
+  else if (pathname.startsWith('/settings')) page = <PlaceholderPage title="Settings" subtitle="Settings pages are coming soon." />
+
+  if (!page) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45 }}
+          className="w-full max-w-md space-y-6"
+        >
+          <AuthHeader
+            title="Page not found"
+            subtitle="The requested experience is not available. Use the links below to continue."
+          />
+          <AuthIllustration />
+          <AuthCard>
+            <div className="space-y-4 text-center">
+              <p className="text-sm text-slate-500">Return to the enterprise authentication flow or open the demo dashboard.</p>
+              <div className="space-y-3">
+                <AuthButton type="button" fullWidth onClick={() => goToPath('/login')}>
+                  <LogIn className="h-4 w-4" />
+                  Go to Login
+                </AuthButton>
+                <AuthButton type="button" variant="secondary" fullWidth onClick={() => goToPath('/dashboard')}>
+                  <LayoutDashboard className="h-4 w-4" />
+                  Open Demo Dashboard
+                </AuthButton>
+              </div>
             </div>
-          </div>
-        </AuthCard>
-        <AuthFooter />
-      </motion.div>
-    </main>
-  )
+          </AuthCard>
+          <AuthFooter />
+        </motion.div>
+      </main>
+    )
+  }
+
+  return <AppShell>{page}</AppShell>
 }
 
 export default App
