@@ -116,6 +116,10 @@ router.post('/auth/login', validate(LoginSchema), asyncHandler(async (req, res) 
   });
 }));
 
+router.get('/auth/me', authenticate, (req, res) => {
+  res.json({ user: req.user });
+});
+
 // --- ORG SETUP ROUTE HANDLERS (DEPARTMENTS) ---
 
 router.use('/org', authenticate);
