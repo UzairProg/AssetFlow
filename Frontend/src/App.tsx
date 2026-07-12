@@ -10,6 +10,8 @@ import AuthHeader from './components/auth/AuthHeader'
 import AuthIllustration from './components/auth/AuthIllustration'
 import LandingPage from './pages/Landing/LandingPage'
 import DashboardPage from './pages/dashboard/DashboardPage'
+import OrganizationOverview from './pages/organization/overview/OverviewPage'
+import PlaceholderPage from './pages/Placeholder/PlaceholderPage'
 import ForgotPassword from './pages/auth/ForgotPassword/ForgotPassword'
 import Login from './pages/auth/Login/Login'
 import ResetPassword from './pages/auth/ResetPassword/ResetPassword'
@@ -42,6 +44,15 @@ const App = () => {
   if (pathname === '/reset-password') return <ResetPassword />
   if (pathname === '/two-factor') return <TwoFactor />
   if (pathname === '/dashboard') return <DashboardPage />
+  if (pathname === '/organization' || pathname.startsWith('/organization/')) return <OrganizationOverview />
+  if (pathname.startsWith('/assets')) return <PlaceholderPage title="Assets" subtitle="Asset management pages are coming soon." />
+  if (pathname.startsWith('/bookings')) return <PlaceholderPage title="Bookings" subtitle="Bookings pages are coming soon." />
+  if (pathname.startsWith('/maintenance')) return <PlaceholderPage title="Maintenance" subtitle="Maintenance pages are coming soon." />
+  if (pathname.startsWith('/audit')) return <PlaceholderPage title="Audit" subtitle="Audit pages are coming soon." />
+  if (pathname.startsWith('/reports')) return <PlaceholderPage title="Reports" subtitle="Reports pages are coming soon." />
+  if (pathname.startsWith('/notifications')) return <PlaceholderPage title="Notifications" subtitle="Notifications pages are coming soon." />
+  if (pathname.startsWith('/activity')) return <PlaceholderPage title="Activity Logs" subtitle="Activity log pages are coming soon." />
+  if (pathname.startsWith('/settings')) return <PlaceholderPage title="Settings" subtitle="Settings pages are coming soon." />
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">

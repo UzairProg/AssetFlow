@@ -19,8 +19,9 @@ const Sidebar = ({ mobile = false }: { mobile?: boolean }) => {
     <motion.aside
       layout
       transition={{ type: 'spring', stiffness: 280, damping: 30 }}
-      className={`${widthClass} ${mobile ? 'h-full' : 'sticky top-0 h-screen'} flex flex-col border-r border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.06)] transition-all duration-300 ease-in-out`}
+      className={`${widthClass} ${mobile ? 'h-full' : 'sticky top-0 min-h-screen'} flex flex-col border-r border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.06)] transition-all duration-300 ease-in-out`}
       aria-label="Sidebar navigation"
+      style={{ top: 0 }}
     >
       <div className="flex h-20 items-center justify-between border-b border-slate-200 px-4">
         <button

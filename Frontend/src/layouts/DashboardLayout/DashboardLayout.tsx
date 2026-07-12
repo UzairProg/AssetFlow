@@ -18,9 +18,9 @@ type DashboardLayoutProps = PropsWithChildren<{
 const DashboardLayout = ({ title, subtitle, actions, children }: DashboardLayoutProps) => {
   return (
     <SidebarProvider>
-      <div className="relative min-h-screen overflow-hidden bg-slate-50 text-slate-900 lg:flex">
+      <div className="relative min-h-screen bg-slate-50 text-slate-900 lg:flex">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(37,99,235,0.05),_transparent_36%),radial-gradient(circle_at_bottom_left,_rgba(15,23,42,0.03),_transparent_30%)]" />
-        <div className="hidden lg:block">
+          <div className="hidden lg:block lg:flex-none">
           <Sidebar />
         </div>
         <MobileSidebar />
