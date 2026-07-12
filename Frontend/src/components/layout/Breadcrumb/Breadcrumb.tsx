@@ -1,6 +1,7 @@
 import { ChevronRight } from 'lucide-react'
 
 import useBreadcrumb from '../../../hooks/useBreadcrumb/useBreadcrumb'
+import { goToPath } from '../../../lib/demoAuth'
 
 const Breadcrumb = () => {
   const items = useBreadcrumb()
@@ -13,13 +14,19 @@ const Breadcrumb = () => {
         return (
           <span key={item.href} className="flex items-center gap-2">
             {index > 0 ? <ChevronRight className="h-3.5 w-3.5 text-slate-300" /> : null}
-            <a
-              href={item.href}
-              aria-current={isLast ? 'page' : undefined}
-              className={isLast ? 'font-semibold text-slate-900' : 'transition hover:text-blue-900'}
-            >
-              {item.label}
-            </a>
+            {isLast ? (
+              <span aria-current="page" className="font-semibold text-slate-900">
+                {item.label}
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => goToPath(item.href)}
+                className="rounded-2xl px-1 py-0.5 transition hover:text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              >
+                {item.label}
+              </button>
+            )}
           </span>
         )
       })}

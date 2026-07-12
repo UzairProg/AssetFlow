@@ -7,10 +7,10 @@ const PageTransition = ({ children }: PropsWithChildren) => {
     <AnimatePresence mode="wait">
       <motion.div
         key={window.location.pathname}
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 10, filter: 'blur(2px)' }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -8 }}
-        transition={{ duration: 0.28, ease: 'easeInOut' }}
+        exit={{ opacity: 0, y: -6, filter: 'blur(2px)' }}
+        transition={{ duration: 0.24, ease: 'easeOut' }}
       >
         {children}
       </motion.div>
