@@ -35,6 +35,7 @@ model User {
   department     Department? @relation("UserDepartment", fields: [departmentId], references: [id])
   headedDept     Department? @relation("DepartmentHead")
   assignedAssets Asset[]     @relation("AssetAssignee")
+  allocations    Allocation[]
   createdAt      DateTime    @default(now())
 }
 
@@ -49,6 +50,7 @@ model Department {
   status             String       @default("ACTIVE")
   users              User[]       @relation("UserDepartment")
   assets             Asset[]      @relation("AssetDepartment")
+  allocations        Allocation[]
   createdAt          DateTime     @default(now())
 }
 
@@ -76,5 +78,19 @@ model Asset {
   department      Department? @relation("AssetDepartment", fields: [departmentId], references: [id])
   assignedToId    String?
   assignedTo      User?       @relation("AssetAssignee", fields: [assignedToId], references: [id])
+  allocations     Allocation[]
   createdAt       DateTime    @default(now())
+}
+
+model Allocation {
+  id           String      @id @default(uuid())
+  assetId      String
+  asset        Asset       @relation(fields: [assetId], references: [id])
+  userId       String
+  user         User        @relation(fields: [userId], references: [id])
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  allocatedAt  DateTime    @default(now())
+  returnedAt   DateTime?
+  status       String      @default("ACTIVE") // ACTIVE, RETURNED
 }

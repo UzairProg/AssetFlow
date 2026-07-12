@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require('./db');
 const { authenticate, authorize, validate } = require('./middleware');
+const allocationRoutes = require('./routes/allocation.routes');
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-for-assetflow-hackathon';
@@ -299,6 +300,9 @@ router.route('/assets/:id')
     });
     res.json(asset);
   }));
+
+// --- ALLOCATION ROUTE HANDLERS ---
+router.use('/allocations', allocationRoutes);
 
 // --- DASHBOARD ROUTE HANDLERS ---
 
